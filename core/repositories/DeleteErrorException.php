@@ -1,10 +1,8 @@
 <?php
 
-
 namespace core\repositories;
 
-
-class DeleteErrorException
+class DeleteErrorException extends \RuntimeException
 {
 
 }

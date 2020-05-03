@@ -1,10 +1,8 @@
 <?php
 
-
 namespace core\repositories;
 
-
-class SaveErrorException
+class SaveErrorException extends \RuntimeException
 {
 
 }
