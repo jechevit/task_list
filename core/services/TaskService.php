@@ -4,7 +4,6 @@ namespace core\services;
 
 use Assert\AssertionFailedException;
 use core\entities\Task;
-use core\entities\TaskUuid;
 use core\forms\TaskForm;
 use core\repositories\TasksRepository;
 
@@ -37,7 +36,7 @@ class TaskService
         return $task;
     }
 
-    public function edit(int $id, TaskForm $form): void
+    public function update(int $id, TaskForm $form): void
     {
         $task = $this->taskRepository->get($id);
         $task->edit(

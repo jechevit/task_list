@@ -7,6 +7,7 @@ use core\databases\Table;
 use DateTimeImmutable;
 use DomainException;
 use yii\db\ActiveRecord;
+use yii\helpers\Json;
 
 /**
  * Class Task
@@ -221,5 +222,30 @@ class Task extends ActiveRecord
         return [
             self::SCENARIO_DEFAULT => self::OP_ALL,
         ];
+    }
+
+    public function afterFind(): void
+    {
+        $this->statuses = array_map(function ($row) {
+            return new Status(
+                $row['value'],
+                new DateTimeImmutable($row['date'])
+            );
+        }, Json::decode($this->getAttribute('statuses')));
+
+        parent::afterFind();
+    }
+
+    public function beforeSave($insert): bool
+    {
+        $this->setAttribute('statuses', Json::encode(array_map(function (Status $status) {
+            return [
+                'value' => $status->getValue(),
+                'date' => $status->getDate()->format(DATE_RFC3339),
+            ];
+        }, $this->statuses)));
+
+
+        return parent::beforeSave($insert);
     }
 }
