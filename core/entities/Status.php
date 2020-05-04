@@ -4,11 +4,9 @@ namespace core\entities;
 
 use Assert\Assertion;
 use Assert\AssertionFailedException;
-use DateTimeImmutable;
 
 class Status
 {
-    const DRAFT = 0;
     const IN_WORK = 1;
     const COMPLETED = 2;
 
@@ -16,35 +14,20 @@ class Status
      * @var mixed
      */
     private $value;
-    /**
-     * @var DateTimeImmutable
-     */
-    private $date;
 
     /**
      * Status constructor.
      * @param $value
-     * @param DateTimeImmutable $date
      * @throws AssertionFailedException
      */
-    public function __construct($value, DateTimeImmutable $date)
+    public function __construct($value)
     {
         Assertion::inArray($value, [
-            self::DRAFT,
             self::IN_WORK,
             self::COMPLETED
         ]);
 
         $this->value = $value;
-        $this->date = $date;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isDraft(): bool
-    {
-        return $this->value === self::DRAFT;
     }
 
     /**
@@ -69,13 +52,5 @@ class Status
     public function getValue()
     {
         return $this->value;
-    }
-
-    /**
-     * @return DateTimeImmutable
-     */
-    public function getDate(): DateTimeImmutable
-    {
-        return $this->date;
     }
 }

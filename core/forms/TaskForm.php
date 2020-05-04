@@ -1,10 +1,8 @@
 <?php
 
-
 namespace core\forms;
 
-
-use core\helpers\StatusHelper;
+use core\helpers\PriorityHelper;
 use yii\base\Model;
 
 class TaskForm extends Model
@@ -17,7 +15,7 @@ class TaskForm extends Model
         return [
             [['title', 'priority'], 'required'],
             ['title', 'string'],
-            ['priority', 'in', 'range' => array_keys(StatusHelper::statusesList())],
+            ['priority', 'in', 'range' => array_keys(PriorityHelper::priorityList())],
         ];
     }
 }

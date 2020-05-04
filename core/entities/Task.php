@@ -2,12 +2,9 @@
 
 namespace core\entities;
 
-use Assert\AssertionFailedException;
 use core\databases\Table;
-use DateTimeImmutable;
 use DomainException;
 use yii\db\ActiveRecord;
-use yii\helpers\Json;
 
 /**
  * Class Task
@@ -15,24 +12,20 @@ use yii\helpers\Json;
  * @property int $id
  * @property string $uuid
  * @property string $title
- * @property int $current_status
  * @property int $created_at
  * @property int $updated_at
  *
  * @property Priority $priority
+ * @property Status $current_status
  * @property Tag[] $tags
- * @property Status[] $statuses
  */
 class Task extends ActiveRecord
 {
-    public $statuses = [];
-
     /**
      * @param TaskUuid $uuid
      * @param $title
      * @param Priority $priority
      * @return static
-     * @throws AssertionFailedException
      */
     public static function create(
         TaskUuid $uuid,
@@ -44,7 +37,7 @@ class Task extends ActiveRecord
         $task->uuid = $uuid->getUuid();
         $task->title = $title;
         $task->setPriority($priority);
-        $task->addStatus(Status::DRAFT);
+        $task->setCurrentStatus(new Status(Status::IN_WORK));
         $task->created_at = time();
         return $task;
     }
@@ -63,34 +56,12 @@ class Task extends ActiveRecord
         $this->updated_at = time();
     }
 
-    /**
-     * @throws AssertionFailedException
-     */
-    public function draft(): void
-    {
-        if ($this->isDraft()) {
-            throw new DomainException('Task already is draft');
-        }
-        $this->addStatus(Status::DRAFT);
-    }
-
-    /**
-     * @return bool
-     */
-    public function isDraft(): bool
-    {
-        return $this->getCurrentStatus()->isDraft();
-    }
-
-    /**
-     * @throws AssertionFailedException
-     */
     public function inWork(): void
     {
         if ($this->isInWork()) {
             throw new DomainException('Task already is in work!');
         }
-        $this->addStatus(Status::IN_WORK);
+        $this->setCurrentStatus(new Status(Status::IN_WORK));
     }
 
     /**
@@ -98,18 +69,15 @@ class Task extends ActiveRecord
      */
     public function isInWork(): bool
     {
-        return $this->getCurrentStatus()->isInWork();
+        return $this->current_status->isInWork();
     }
 
-    /**
-     * @throws AssertionFailedException
-     */
     public function complete(): void
     {
         if ($this->isCompleted()) {
             throw new DomainException('Task already is completed');
         }
-        $this->addStatus(Status::COMPLETED);
+        $this->setCurrentStatus(new Status(Status::COMPLETED));
     }
 
     /**
@@ -117,36 +85,24 @@ class Task extends ActiveRecord
      */
     public function isCompleted(): bool
     {
-        return $this->getCurrentStatus()->isCompleted();
+        return $this->current_status->isCompleted();
     }
 
     /**
-     * @return Status
+     * @param Status $value
      */
-    private function getCurrentStatus(): Status
+    private function setCurrentStatus(Status $value): void
     {
-        return end($this->statuses);
+        $this->current_status = $value->getValue();
     }
 
-    /**
-     * @param $value
-     * @throws AssertionFailedException
-     */
-    private function addStatus($value): void
-    {
-        $this->statuses[] = new Status($value, new DateTimeImmutable());
-        $this->current_status = $value;
-    }
 
-    /**
-     * @throws AssertionFailedException
-     */
     public function toLow(): void
     {
         if ($this->isLow()) {
             throw new DomainException('Task has a low priority');
         }
-        $this->setPriority(Priority::LOW);
+        $this->setPriority(new Priority(Priority::LOW));
     }
 
     /**
@@ -157,15 +113,12 @@ class Task extends ActiveRecord
         return $this->getCurrentPriority()->isLow();
     }
 
-    /**
-     * @throws AssertionFailedException
-     */
     public function toMiddle(): void
     {
         if ($this->isMiddle()) {
             throw new DomainException('Task has a middle priority');
         }
-        $this->setPriority(Priority::MIDDLE);
+        $this->setPriority(new Priority(Priority::MIDDLE));
     }
 
     /**
@@ -176,15 +129,12 @@ class Task extends ActiveRecord
         return $this->getCurrentPriority()->isMiddle();
     }
 
-    /**
-     * @throws AssertionFailedException
-     */
     public function toHigh(): void
     {
         if ($this->isHigh()) {
             throw new DomainException('Task has a high priority');
         }
-        $this->setPriority(Priority::HIGH);
+        $this->setPriority(new Priority(Priority::HIGH));
     }
 
     /**
@@ -204,12 +154,11 @@ class Task extends ActiveRecord
     }
 
     /**
-     * @param $priority
-     * @throws AssertionFailedException
+     * @param Priority $priority
      */
-    private function setPriority($priority): void
+    private function setPriority(Priority $priority): void
     {
-        $this->priority = new Priority($priority);
+        $this->priority = $priority->getValue();
     }
 
     public static function tableName()
@@ -222,30 +171,5 @@ class Task extends ActiveRecord
         return [
             self::SCENARIO_DEFAULT => self::OP_ALL,
         ];
-    }
-
-    public function afterFind(): void
-    {
-        $this->statuses = array_map(function ($row) {
-            return new Status(
-                $row['value'],
-                new DateTimeImmutable($row['date'])
-            );
-        }, Json::decode($this->getAttribute('statuses')));
-
-        parent::afterFind();
-    }
-
-    public function beforeSave($insert): bool
-    {
-        $this->setAttribute('statuses', Json::encode(array_map(function (Status $status) {
-            return [
-                'value' => $status->getValue(),
-                'date' => $status->getDate()->format(DATE_RFC3339),
-            ];
-        }, $this->statuses)));
-
-
-        return parent::beforeSave($insert);
     }
 }

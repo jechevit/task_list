@@ -3,6 +3,7 @@
 namespace core\services;
 
 use Assert\AssertionFailedException;
+use core\entities\Priority;
 use core\entities\Task;
 use core\forms\TaskForm;
 use core\repositories\TasksRepository;
@@ -30,9 +31,9 @@ class TaskService
         $task = Task::create(
             $uuid,
             $form->title,
-            $form->priority
+            new Priority($form->priority)
         );
-
+        $this->taskRepository->save($task);
         return $task;
     }
 
@@ -47,8 +48,7 @@ class TaskService
     }
 
     /**
-     * @param $id
-     * @throws AssertionFailedException
+     * @param int $id
      */
     public function toLow(int $id): void
     {
@@ -59,7 +59,6 @@ class TaskService
 
     /**
      * @param int $id
-     * @throws AssertionFailedException
      */
     public function toMiddle(int $id): void
     {
@@ -70,7 +69,6 @@ class TaskService
 
     /**
      * @param int $id
-     * @throws AssertionFailedException
      */
     public function toHigh(int $id): void
     {

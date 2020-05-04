@@ -48,7 +48,7 @@ class TaskController extends Controller
     {
         $tasks = $this->readRepository->getAll();
 
-        $this->render('index', [
+        return $this->render('index', [
             'tasks' => $tasks,
         ]);
     }
@@ -57,7 +57,7 @@ class TaskController extends Controller
     {
         $task = $this->findModel($id);
 
-        $this->render('view', [
+        return $this->render('view', [
             'task' => $task
         ]);
     }
