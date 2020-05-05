@@ -49,6 +49,7 @@ class TaskService
 
     /**
      * @param int $id
+     * @throws AssertionFailedException
      */
     public function toLow(int $id): void
     {
@@ -59,6 +60,7 @@ class TaskService
 
     /**
      * @param int $id
+     * @throws AssertionFailedException
      */
     public function toMiddle(int $id): void
     {
@@ -69,6 +71,7 @@ class TaskService
 
     /**
      * @param int $id
+     * @throws AssertionFailedException
      */
     public function toHigh(int $id): void
     {

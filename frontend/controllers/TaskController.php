@@ -127,6 +127,51 @@ class TaskController extends Controller
         return $this->redirect(['index']);
     }
 
+    /**
+     * @param int $id
+     * @return Response
+     * @throws AssertionFailedException
+     */
+    public function actionLow(int $id)
+    {
+        try {
+            $this->taskService->toLow($id);
+        } catch (DomainException $e) {
+            Yii::$app->session->setFlash('error', $e->getMessage());
+        }
+        return $this->redirect(['index']);
+    }
+
+    /**
+     * @param int $id
+     * @return Response
+     * @throws AssertionFailedException
+     */
+    public function actionMiddle(int $id)
+    {
+        try {
+            $this->taskService->toMiddle($id);
+        } catch (DomainException $e) {
+            Yii::$app->session->setFlash('error', $e->getMessage());
+        }
+        return $this->redirect(['index']);
+    }
+
+    /**
+     * @param int $id
+     * @return Response
+     * @throws AssertionFailedException
+     */
+    public function actionHigh(int $id)
+    {
+        try {
+            $this->taskService->toHigh($id);
+        } catch (DomainException $e) {
+            Yii::$app->session->setFlash('error', $e->getMessage());
+        }
+        return $this->redirect(['index']);
+    }
+
 
     protected function findModel($id): Task
     {
