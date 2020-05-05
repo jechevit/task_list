@@ -4,9 +4,11 @@ use core\entities\Task;
 use core\helpers\PriorityHelper;
 use core\helpers\StatusHelper;
 use frontend\widgets\IndexModerationButtons;
+use frontend\widgets\TagsWidget;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\helpers\Url;
+use yii\widgets\Pjax;
 
 /** @var $tasks ActiveDataProvider */
 
@@ -20,7 +22,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <p>
             <?= Html::a('Создать задачу', ['create'], ['class' => 'btn btn-success']) ?>
         </p>
-        <?php \yii\widgets\Pjax::begin(); ?>
+        <?php Pjax::begin(); ?>
         <?php /** @var Task $task */
         foreach ($tasks->getModels() as $key => $task):?>
             <div class="panel panel-default">
@@ -30,6 +32,9 @@ $this->params['breadcrumbs'][] = $this->title;
                         <p class="panel-title">Задача № <?= $task->id ?></p>
                         <?= StatusHelper::statusLabel($task->getCurrentStatus()->getValue())?>
                         <?= PriorityHelper::priorityLabel($task)?>
+                        
+                        <?= TagsWidget::widget(['task' => $task])?>
+
                     </div>
                     <div class="panel-title pull-right">
                         <?= IndexModerationButtons::widget(['task' => $task])?>
@@ -43,6 +48,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 </div>
             </div>
         <?php endforeach; ?>
-        <?php \yii\widgets\Pjax::end(); ?>
+        <?php Pjax::end(); ?>
     </div>
 </div>
