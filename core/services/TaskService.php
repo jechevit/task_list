@@ -133,4 +133,15 @@ class TaskService
         $task->complete();
         $this->taskRepository->save($task);
     }
+
+    /**
+     * @param int $taskId
+     * @param int $tagId
+     */
+    public function deleteTag(int $taskId, int $tagId): void
+    {
+        $task = $this->taskRepository->get($taskId);
+        $task->revokeTag($tagId);
+        $this->taskRepository->save($task);
+    }
 }

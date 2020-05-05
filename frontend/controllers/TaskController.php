@@ -208,6 +208,24 @@ class TaskController extends Controller
     }
 
 
+    /**
+     * @param int $id
+     * @param int $tagId
+     * @return Response
+     */
+    public function actionDeleteTag(int $id, int $tagId)
+    {
+        $task = $this->findModel($id);
+
+        try {
+            $this->taskService->deleteTag($task->id, $tagId);
+        } catch (DomainException $e) {
+            Yii::$app->session->setFlash('error', $e->getMessage());
+        }
+
+        return $this->redirect(['index']);
+    }
+
     protected function findModel($id): Task
     {
         if (($model = Task::findOne($id)) !== null) {
