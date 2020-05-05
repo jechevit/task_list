@@ -29,10 +29,13 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <div class="panel-heading clearfix">
                     <div class="panel-title pull-left">
-                        <p class="panel-title">Задача № <?= $task->id ?></p>
+                        <p class="panel-title">
+                            Задача № <?= $task->id ?>
+                            <span class="date-created">Создано: <?= Yii::$app->formatter->asDatetime($task->created_at, 'php:d-M-Y H:i')?></span>
+                        </p>
                         <?= StatusHelper::statusLabel($task->getCurrentStatus()->getValue())?>
                         <?= PriorityHelper::priorityLabel($task)?>
-                        
+
                         <?= TagsWidget::widget(['task' => $task])?>
 
                     </div>

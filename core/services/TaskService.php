@@ -9,7 +9,12 @@ use core\entities\Task;
 use core\forms\TaskForm;
 use core\repositories\TagRepository;
 use core\repositories\TasksRepository;
+use Throwable;
 
+/**
+ * Class TaskService
+ * @package core\services
+ */
 class TaskService
 {
     /**
@@ -40,7 +45,7 @@ class TaskService
      * @param TaskForm $form
      * @return Task
      * @throws AssertionFailedException
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function create(TaskForm $form): Task
     {
@@ -52,18 +57,12 @@ class TaskService
         );
 
         $this->transaction->wrap(function () use ($task, $form) {
-
             foreach ($form->tags->existing as $tagId) {
-                $tag = $this->tags->get($tagId);
-                $task->assignTag($tag->id);
+                $this->assignTag($task, $tagId);
             }
 
             foreach ($form->tags->newNames as $tagName) {
-                if (!$tag = $this->tags->findByName($tagName)) {
-                    $tag = Tag::create($tagName);
-                    $this->tags->save($tag);
-                }
-                $task->assignTag($tag->id);
+               $this->workWithTag($task, $tagName);
             }
             $this->taskRepository->save($task);
         });
@@ -143,5 +142,55 @@ class TaskService
         $task = $this->taskRepository->get($taskId);
         $task->revokeTag($tagId);
         $this->taskRepository->save($task);
+    }
+
+    /**
+     * @param int $id
+     * @param string $tagName
+     * @param array|null $tagsId
+     * @throws Throwable
+     */
+    public function addTag(int $id, string $tagName = null, array $tagsId = null): void
+    {
+        $task = $this->taskRepository->get($id);
+
+        if ($tagName){
+            $this->transaction->wrap(function () use ($task, $tagName) {
+                $this->workWithTag($task, $tagName);
+
+            });
+        }
+
+        if (isset($tagsId)){
+            $this->transaction->wrap(function () use ($task, $tagsId) {
+                foreach ($tagsId as $tagId){
+                    $this->assignTag($task, $tagId);
+                }
+            });
+        }
+        $this->taskRepository->save($task);
+    }
+
+    /**
+     * @param Task $task
+     * @param string $tagName
+     */
+    private function workWithTag(Task $task, string $tagName): void
+    {
+        if (!$tag = $this->tags->findByName($tagName)) {
+            $tag = Tag::create($tagName);
+            $this->tags->save($tag);
+        }
+        $task->assignTag($tag->id);
+    }
+
+    /**
+     * @param Task $task
+     * @param int $tagId
+     */
+    private function assignTag(Task $task, int $tagId): void
+    {
+        $tag = $this->tags->get($tagId);
+        $task->assignTag($tag->id);
     }
 }

@@ -14,6 +14,7 @@ class TagsForm extends Model
 {
     public $existing = [];
     public $textNew;
+    public $taskId;
 
     public function __construct(Task $task = null, $config = [])
     {
@@ -28,7 +29,8 @@ class TagsForm extends Model
         return [
             ['existing', 'each', 'rule' => ['integer']],
             ['existing', 'default', 'value' => []],
-            ['textNew', 'string'],
+            ['textNew', 'string', 'min' => 2, 'max' => 10],
+            ['taskId', 'integer'],
         ];
     }
 

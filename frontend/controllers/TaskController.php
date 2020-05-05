@@ -9,7 +9,9 @@ use core\readModels\TaskReadRepository;
 use core\repositories\TaskNotFoundException;
 use core\services\TaskService;
 use DomainException;
+use Throwable;
 use Yii;
+use yii\data\ActiveDataProvider;
 use yii\web\Controller;
 use yii\web\Response;
 
@@ -25,7 +27,7 @@ class TaskController extends Controller
     private $readRepository;
 
     /**
-     * @var \yii\data\ActiveDataProvider
+     * @var ActiveDataProvider
      */
     private $tasks;
 
@@ -72,6 +74,7 @@ class TaskController extends Controller
     /**
      * @return string|Response
      * @throws AssertionFailedException
+     * @throws Throwable
      */
     public function actionCreate()
     {
@@ -95,6 +98,7 @@ class TaskController extends Controller
     public function actionUpdate(int $id)
     {
         $task = $this->findModel($id);
+        $this->checkTask($task);
 
         $form = new TaskForm($task);
 
@@ -120,14 +124,12 @@ class TaskController extends Controller
      */
     public function actionDelete(int $id)
     {
-        if(Yii::$app->request->isAjax){
-            try {
-                $this->taskService->remove($id);
-            } catch (DomainException $e) {
-                Yii::$app->session->setFlash('error', $e->getMessage());
-            }
-            return $this->renderPartial('index',['tasks' => $this->tasks,]);
+        try {
+            $this->taskService->remove($id);
+        } catch (DomainException $e) {
+            Yii::$app->session->setFlash('error', $e->getMessage());
         }
+
         return $this->redirect(['index']);
     }
 
@@ -138,13 +140,16 @@ class TaskController extends Controller
      */
     public function actionComplete(int $id)
     {
-        if(Yii::$app->request->isAjax){
+        $task = $this->findModel($id);
+        $this->checkTask($task);
+
+        if (Yii::$app->request->isAjax) {
             try {
-                $this->taskService->complete($id);
+                $this->taskService->complete($task->id);
             } catch (DomainException $e) {
                 Yii::$app->session->setFlash('error', $e->getMessage());
             }
-            return $this->renderPartial('index',['tasks' => $this->tasks,]);
+            return $this->renderPartial('index', ['tasks' => $this->tasks,]);
         }
 
         return $this->redirect(['index']);
@@ -157,13 +162,16 @@ class TaskController extends Controller
      */
     public function actionLow(int $id)
     {
-        if(Yii::$app->request->isAjax){
+        $task = $this->findModel($id);
+        $this->checkTask($task);
+
+        if (Yii::$app->request->isAjax) {
             try {
-                $this->taskService->toLow($id);
+                $this->taskService->toLow($task->id);
             } catch (DomainException $e) {
                 Yii::$app->session->setFlash('error', $e->getMessage());
             }
-            return $this->renderPartial('index',['tasks' => $this->tasks,]);
+            return $this->renderPartial('index', ['tasks' => $this->tasks,]);
         }
 
         return $this->redirect(['index']);
@@ -176,13 +184,16 @@ class TaskController extends Controller
      */
     public function actionMiddle(int $id)
     {
-        if(Yii::$app->request->isAjax){
+        $task = $this->findModel($id);
+        $this->checkTask($task);
+
+        if (Yii::$app->request->isAjax) {
             try {
-                $this->taskService->toMiddle($id);
+                $this->taskService->toMiddle($task->id);
             } catch (DomainException $e) {
                 Yii::$app->session->setFlash('error', $e->getMessage());
             }
-            return $this->renderPartial('index',['tasks' => $this->tasks,]);
+            return $this->renderPartial('index', ['tasks' => $this->tasks,]);
         }
 
         return $this->redirect(['index']);
@@ -195,13 +206,16 @@ class TaskController extends Controller
      */
     public function actionHigh(int $id)
     {
-        if(Yii::$app->request->isAjax){
+        $task = $this->findModel($id);
+        $this->checkTask($task);
+
+        if (Yii::$app->request->isAjax) {
             try {
-                $this->taskService->toHigh($id);
+                $this->taskService->toHigh($task->id);
             } catch (DomainException $e) {
                 Yii::$app->session->setFlash('error', $e->getMessage());
             }
-            return $this->renderPartial('index',['tasks' => $this->tasks,]);
+            return $this->renderPartial('index', ['tasks' => $this->tasks,]);
         }
 
         return $this->redirect(['index']);
@@ -216,6 +230,7 @@ class TaskController extends Controller
     public function actionDeleteTag(int $id, int $tagId)
     {
         $task = $this->findModel($id);
+        $this->checkTask($task);
 
         try {
             $this->taskService->deleteTag($task->id, $tagId);
@@ -224,6 +239,42 @@ class TaskController extends Controller
         }
 
         return $this->redirect(['index']);
+    }
+
+    /**
+     * @return Response
+     * @throws Throwable
+     */
+    public function actionAddTag()
+    {
+        if (!isset(Yii::$app->request->bodyParams['TagsForm'])) {
+            return $this->redirect(['index', ['tasks' => $this->tasks]]);
+        }
+
+        $tagNewName = Yii::$app->request->bodyParams['TagsForm']['textNew'];
+        $taskId = Yii::$app->request->bodyParams['TagsForm']['taskId'];
+        $tagsId = Yii::$app->request->bodyParams['TagsForm']['existing'];
+
+        $task = $this->findModel($taskId);
+
+        $this->checkTask($task);
+
+        try {
+            $this->taskService->addTag($task->id, $tagNewName ?: null, $tagsId ?: null);
+        } catch (DomainException $e) {
+            Yii::$app->session->setFlash('error', $e->getMessage());
+        }
+        return $this->redirect(['index']);
+    }
+
+    /**
+     * @param Task $task
+     */
+    private function checkTask(Task $task): void
+    {
+        if ($task->isCompleted()) {
+            throw new DomainException('Задача уже выполнена');
+        }
     }
 
     protected function findModel($id): Task

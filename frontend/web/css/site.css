@@ -122,3 +122,12 @@ a.desc:after {
 .modal_a {
     cursor: pointer
 }
+
+.date-created {
+    color: rgb(107, 119, 140);
+    padding-top: 2px;
+    white-space: nowrap;
+    margin-top: 0px;
+    font-size: 11px !important;
+    line-height: 1.33333;
+}

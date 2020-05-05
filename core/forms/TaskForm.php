@@ -25,7 +25,7 @@ class TaskForm extends CompositeForm
     {
         return [
             [['title', 'priority'], 'required'],
-            ['title', 'string'],
+            ['title', 'string', 'max' => 300],
             ['priority', 'in', 'range' => array_keys(PriorityHelper::priorityList())],
         ];
     }
