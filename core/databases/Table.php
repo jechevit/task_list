@@ -13,5 +13,5 @@ class Table
 
     const TASKS = '{{%tasks}}';
     const TAGS = '{{%tags}}';
-    const TAGS_ASSIGNMENTS = '{{%tags_assignments}}';
+    const TAGS_ASSIGNMENTS = '{{%tasks_tags_assignments}}';
 }

@@ -3,12 +3,23 @@
 namespace core\forms;
 
 use core\helpers\PriorityHelper;
-use yii\base\Model;
 
-class TaskForm extends Model
+/**
+ * Class TaskForm
+ * @package core\forms
+ *
+ * @property TagsForm $tags
+ */
+class TaskForm extends CompositeForm
 {
     public $title;
     public $priority;
+
+    public function __construct($config = [])
+    {
+        $this->tags = new TagsForm();
+        parent::__construct($config);
+    }
 
     public function rules()
     {
@@ -17,5 +28,10 @@ class TaskForm extends Model
             ['title', 'string'],
             ['priority', 'in', 'range' => array_keys(PriorityHelper::priorityList())],
         ];
+    }
+
+    protected function internalForms(): array
+    {
+        return ['tags',];
     }
 }

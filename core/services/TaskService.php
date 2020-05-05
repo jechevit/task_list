@@ -4,8 +4,10 @@ namespace core\services;
 
 use Assert\AssertionFailedException;
 use core\entities\Priority;
+use core\entities\Tag;
 use core\entities\Task;
 use core\forms\TaskForm;
+use core\repositories\TagRepository;
 use core\repositories\TasksRepository;
 
 class TaskService
@@ -14,16 +16,31 @@ class TaskService
      * @var TasksRepository
      */
     private $taskRepository;
+    /**
+     * @var TransactionManager
+     */
+    private $transaction;
+    /**
+     * @var TagRepository
+     */
+    private $tags;
 
-    public function __construct(TasksRepository $taskRepository)
+    public function __construct(
+        TasksRepository $taskRepository,
+        TagRepository $tags,
+        TransactionManager $transaction
+    )
     {
         $this->taskRepository = $taskRepository;
+        $this->transaction = $transaction;
+        $this->tags = $tags;
     }
 
     /**
      * @param TaskForm $form
      * @return Task
      * @throws AssertionFailedException
+     * @throws \Throwable
      */
     public function create(TaskForm $form): Task
     {
@@ -33,7 +50,24 @@ class TaskService
             $form->title,
             new Priority($form->priority)
         );
-        $this->taskRepository->save($task);
+
+        $this->transaction->wrap(function () use ($task, $form) {
+
+            foreach ($form->tags->existing as $tagId) {
+                $tag = $this->tags->get($tagId);
+                $task->assignTag($tag->id);
+            }
+
+            foreach ($form->tags->newNames as $tagName) {
+                if (!$tag = $this->tags->findByName($tagName)) {
+                    $tag = Tag::create($tagName);
+                    $this->tags->save($tag);
+                }
+                $task->assignTag($tag->id);
+            }
+            $this->taskRepository->save($task);
+        });
+
         return $task;
     }
 

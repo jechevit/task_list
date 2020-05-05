@@ -6,6 +6,8 @@ use Assert\AssertionFailedException;
 use core\databases\Table;
 use DateTimeImmutable;
 use DomainException;
+use lhs\Yii2SaveRelationsBehavior\SaveRelationsBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\Json;
 
@@ -21,6 +23,7 @@ use yii\helpers\Json;
  *
  * @property Priority $priority
  * @property Status[] $statuses
+ * @property TagAssignments[] $tagAssignments
  * @property Tag[] $tags
  */
 class Task extends ActiveRecord
@@ -202,9 +205,65 @@ class Task extends ActiveRecord
         $this->priority = new Priority($priority);
     }
 
+    public function assignTag($id): void
+    {
+        $assignments = $this->tagAssignments;
+        foreach ($assignments as $assignment) {
+            if ($assignment->isForTag($id)) {
+                return;
+            }
+        }
+        $assignments[] = TagAssignments::create($id);
+        $this->tagAssignments = $assignments;
+    }
+
+    public function revokeTag($id): void
+    {
+        $assignments = $this->tagAssignments;
+        foreach ($assignments as $i => $assignment) {
+            if ($assignment->isForTag($id)) {
+                unset($assignments[$i]);
+                $this->tagAssignments = $assignments;
+                return;
+            }
+        }
+        throw new DomainException('Assignment is not found.');
+    }
+
+    public function revokeTags(): void
+    {
+        $this->tagAssignments = [];
+    }
+
     public static function tableName()
     {
         return TABLE::TASKS;
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getTagAssignments(): ActiveQuery
+    {
+        return $this->hasMany(TagAssignments::class, ['task_id' => 'id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getTags(): ActiveQuery
+    {
+        return $this->hasMany(Tag::class, ['id' => 'tag_id'])->via('tagAssignments');
+    }
+
+    public function behaviors(): array
+    {
+        return [
+            [
+                'class' => SaveRelationsBehavior::class,
+                'relations' => ['tagAssignments'],
+            ],
+        ];
     }
 
     public function transactions(): array
