@@ -20,7 +20,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <p>
             <?= Html::a('Создать задачу', ['create'], ['class' => 'btn btn-success']) ?>
         </p>
-
+        <?php \yii\widgets\Pjax::begin(); ?>
         <?php /** @var Task $task */
         foreach ($tasks->getModels() as $key => $task):?>
             <div class="panel panel-default">
@@ -43,5 +43,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 </div>
             </div>
         <?php endforeach; ?>
+        <?php \yii\widgets\Pjax::end(); ?>
     </div>
 </div>

@@ -25,6 +25,11 @@ class TaskController extends Controller
     private $readRepository;
 
     /**
+     * @var \yii\data\ActiveDataProvider
+     */
+    private $tasks;
+
+    /**
      * TaskController constructor.
      * @param $id
      * @param $module
@@ -42,6 +47,8 @@ class TaskController extends Controller
         parent::__construct($id, $module, $config);
         $this->taskService = $taskService;
         $this->readRepository = $readRepository;
+
+        $this->tasks = $this->readRepository->getAll();
     }
 
     public function actionIndex()
@@ -49,7 +56,7 @@ class TaskController extends Controller
         $tasks = $this->readRepository->getAll();
 
         return $this->render('index', [
-            'tasks' => $tasks,
+            'tasks' => $this->tasks,
         ]);
     }
 
@@ -107,68 +114,96 @@ class TaskController extends Controller
         ]);
     }
 
+    /**
+     * @param int $id
+     * @return string|Response
+     */
     public function actionDelete(int $id)
     {
-        try {
-            $this->taskService->remove($id);
-        } catch (DomainException $e) {
-            Yii::$app->session->setFlash('error', $e->getMessage());
-        }
-        return $this->redirect(['index']);
-    }
-
-    public function actionComplete(int $id)
-    {
-        try {
-            $this->taskService->complete($id);
-        } catch (DomainException $e) {
-            Yii::$app->session->setFlash('error', $e->getMessage());
+        if(Yii::$app->request->isAjax){
+            try {
+                $this->taskService->remove($id);
+            } catch (DomainException $e) {
+                Yii::$app->session->setFlash('error', $e->getMessage());
+            }
+            return $this->renderPartial('index',['tasks' => $this->tasks,]);
         }
         return $this->redirect(['index']);
     }
 
     /**
      * @param int $id
-     * @return Response
+     * @return string|Response
+     * @throws AssertionFailedException
+     */
+    public function actionComplete(int $id)
+    {
+        if(Yii::$app->request->isAjax){
+            try {
+                $this->taskService->complete($id);
+            } catch (DomainException $e) {
+                Yii::$app->session->setFlash('error', $e->getMessage());
+            }
+            return $this->renderPartial('index',['tasks' => $this->tasks,]);
+        }
+
+        return $this->redirect(['index']);
+    }
+
+    /**
+     * @param int $id
+     * @return Response | string
      * @throws AssertionFailedException
      */
     public function actionLow(int $id)
     {
-        try {
-            $this->taskService->toLow($id);
-        } catch (DomainException $e) {
-            Yii::$app->session->setFlash('error', $e->getMessage());
+        if(Yii::$app->request->isAjax){
+            try {
+                $this->taskService->toLow($id);
+            } catch (DomainException $e) {
+                Yii::$app->session->setFlash('error', $e->getMessage());
+            }
+            return $this->renderPartial('index',['tasks' => $this->tasks,]);
         }
+
         return $this->redirect(['index']);
     }
 
     /**
      * @param int $id
-     * @return Response
+     * @return Response | string
      * @throws AssertionFailedException
      */
     public function actionMiddle(int $id)
     {
-        try {
-            $this->taskService->toMiddle($id);
-        } catch (DomainException $e) {
-            Yii::$app->session->setFlash('error', $e->getMessage());
+        if(Yii::$app->request->isAjax){
+            try {
+                $this->taskService->toMiddle($id);
+            } catch (DomainException $e) {
+                Yii::$app->session->setFlash('error', $e->getMessage());
+            }
+            return $this->renderPartial('index',['tasks' => $this->tasks,]);
         }
+
         return $this->redirect(['index']);
     }
 
     /**
      * @param int $id
-     * @return Response
+     * @return Response | string
      * @throws AssertionFailedException
      */
     public function actionHigh(int $id)
     {
-        try {
-            $this->taskService->toHigh($id);
-        } catch (DomainException $e) {
-            Yii::$app->session->setFlash('error', $e->getMessage());
+        if(Yii::$app->request->isAjax){
+            try {
+                $this->taskService->toHigh($id);
+            } catch (DomainException $e) {
+                Yii::$app->session->setFlash('error', $e->getMessage());
+            }
+            return $this->renderPartial('index',['tasks' => $this->tasks,]);
         }
+
         return $this->redirect(['index']);
     }
 

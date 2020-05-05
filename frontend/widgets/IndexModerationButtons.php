@@ -83,7 +83,7 @@ class IndexModerationButtons extends Widget
 
     private function getButtonLow()
     {
-        return Html::tag(self::LI, Html::a('Низкий ', ['low', 'id' => $this->task->id]));
+        return Html::tag(self::LI, Html::a('Низкий ', ['low', 'id' => $this->task->id], ['data-pjax'=> 1]));
     }
 
     private function getButtonMiddle()
