@@ -107,10 +107,20 @@ class TaskController extends Controller
         ]);
     }
 
-    public function remove(int $id)
+    public function actionDelete(int $id)
     {
         try {
             $this->taskService->remove($id);
+        } catch (DomainException $e) {
+            Yii::$app->session->setFlash('error', $e->getMessage());
+        }
+        return $this->redirect(['index']);
+    }
+
+    public function actionComplete(int $id)
+    {
+        try {
+            $this->taskService->complete($id);
         } catch (DomainException $e) {
             Yii::$app->session->setFlash('error', $e->getMessage());
         }

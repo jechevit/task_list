@@ -85,4 +85,15 @@ class TaskService
         $task = $this->taskRepository->get($id);
         $this->taskRepository->remove($task);
     }
+
+    /**
+     * @param int $id
+     * @throws AssertionFailedException
+     */
+    public function complete(int $id): void
+    {
+        $task = $this->taskRepository->get($id);
+        $task->complete();
+        $this->taskRepository->save($task);
+    }
 }

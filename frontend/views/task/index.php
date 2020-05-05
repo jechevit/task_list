@@ -1,6 +1,9 @@
 <?php
 
 use core\entities\Task;
+use core\helpers\PriorityHelper;
+use core\helpers\StatusHelper;
+use frontend\widgets\IndexModerationButtons;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -16,20 +19,31 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
     <div class="body-content">
         <p>
-            <?= Html::a('Создать задачу', ['create'], ['class' => 'btn btn-success'])?>
+            <?= Html::a('Создать задачу', ['create'], ['class' => 'btn btn-success']) ?>
         </p>
 
-            <div class="list-group">
-                <?php /** @var Task $task */
-                foreach ($tasks->getModels() as $key => $task):?>
-                    <a href="<?= Url::to(['task/view', 'id' => $task->id])?>" class="list-group-item">
-                        <span class="label label-primary"><?= $task->getCurrentStatus()->getValue() ?></span>
-                        <span class="label label-primary"><?= $task->getCurrentPriority()->getValue() ?></span>
-                        <h4 class="list-group-item-heading">Задача № <?= $key + 1 ?></h4>
-                        <p class="list-group-item-text"><?= $task->title?></p>
-                    </a>
-                <?php endforeach;?>
-            </div>
 
+        <?php /** @var Task $task */
+        foreach ($tasks->getModels() as $key => $task):?>
+            <div class="panel panel-default">
+
+                <div class="panel-heading clearfix">
+                    <div class="panel-title pull-left">
+                        <p class="panel-title">Задача № <?= $task->id ?></p>
+                        <?= StatusHelper::statusLabel($task->getCurrentStatus()->getValue())?>
+                        <?= PriorityHelper::priorityLabel($task)?>
+                    </div>
+                    <div class="panel-title pull-right">
+                        <?= IndexModerationButtons::widget(['task' => $task])?>
+                    </div>
+                </div>
+
+                <div class="panel-body">
+                    <a href="<?= Url::to(['task/view', 'id' => $task->id]) ?>">
+                        <p class="list-group-item-text"><?= $task->title ?></p>
+                    </a>
+                </div>
+            </div>
+        <?php endforeach; ?>
     </div>
 </div>
