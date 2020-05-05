@@ -22,7 +22,7 @@ class TaskReadRepository
             'query' => $query,
             'sort' => [
                 'defaultOrder' => [
-                    'priority' => SORT_DESC,
+                    'current_status' => SORT_DESC,
                 ],
             ],
             'pagination' => [

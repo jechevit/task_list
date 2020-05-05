@@ -20,6 +20,7 @@ class m200503_223949_create_tasks_table extends Migration
             Column::TITLE => $this->text()->notNull(),
             Column::PRIORITY => $this->integer()->notNull(),
             Column::CURRENT_STATUS => $this->integer()->notNull(),
+            Column::STATUSES => $this->json()->notNull(),
             Column::CREATED_AT => $this->integer()->unsigned()->notNull(),
             Column::UPDATED_AT => $this->integer()->unsigned()->null(),
         ], Table::OPTIONS);

@@ -14,7 +14,7 @@ class Priority
     /**
      * @var int
      */
-    private $value;
+    public $value;
 
     /**
      * Priority constructor.
