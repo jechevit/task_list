@@ -10,7 +10,6 @@ use yii\helpers\Url;
 
 /** @var $tasks ActiveDataProvider */
 
-
 $this->title = 'Задачи';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -21,7 +20,6 @@ $this->params['breadcrumbs'][] = $this->title;
         <p>
             <?= Html::a('Создать задачу', ['create'], ['class' => 'btn btn-success']) ?>
         </p>
-
 
         <?php /** @var Task $task */
         foreach ($tasks->getModels() as $key => $task):?>

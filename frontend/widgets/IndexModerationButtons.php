@@ -42,7 +42,7 @@ class IndexModerationButtons extends Widget
 
         $priorityButton = $this->renderPriority();
 
-        return $statusButton . ' '. $priorityButton;
+        return $priorityButton . ' '. $statusButton;
     }
 
     private function renderPriority()
