@@ -6,6 +6,7 @@ use Assert\AssertionFailedException;
 use core\entities\Task;
 use core\forms\TaskForm;
 use core\readModels\TaskReadRepository;
+use core\repositories\TagRepository;
 use core\repositories\TaskNotFoundException;
 use core\services\TaskService;
 use DomainException;
@@ -13,6 +14,7 @@ use Throwable;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\web\Controller;
+use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
 class TaskController extends Controller
@@ -30,6 +32,10 @@ class TaskController extends Controller
      * @var ActiveDataProvider
      */
     private $tasks;
+    /**
+     * @var TagRepository
+     */
+    private $tagRepository;
 
     /**
      * TaskController constructor.
@@ -37,6 +43,7 @@ class TaskController extends Controller
      * @param $module
      * @param TaskService $taskService
      * @param TaskReadRepository $readRepository
+     * @param TagRepository $tagRepository
      * @param array $config
      */
     public function __construct(
@@ -44,6 +51,7 @@ class TaskController extends Controller
         $module,
         TaskService $taskService,
         TaskReadRepository $readRepository,
+        TagRepository $tagRepository,
         $config = [])
     {
         parent::__construct($id, $module, $config);
@@ -51,14 +59,28 @@ class TaskController extends Controller
         $this->readRepository = $readRepository;
 
         $this->tasks = $this->readRepository->getAll();
+        $this->tagRepository = $tagRepository;
     }
 
+    /**
+     * @return string
+     * @throws NotFoundHttpException
+     */
     public function actionIndex()
     {
-        $tasks = $this->readRepository->getAll();
+        if (isset(Yii::$app->request->queryParams['tagId'])){
+            $tagId = Yii::$app->request->queryParams['tagId'];
+            if (!$tag = $this->tagRepository->get($tagId)){
+                throw new NotFoundHttpException('The requested page does not exist.');
+            }
+            $tasks = $this->readRepository->getAllByTag($tag);
+        } else {
+            $tasks = $this->readRepository->getAll();
+        }
+
 
         return $this->render('index', [
-            'tasks' => $this->tasks,
+            'tasks' => $tasks,
         ]);
     }
 
@@ -143,13 +165,10 @@ class TaskController extends Controller
         $task = $this->findModel($id);
         $this->checkTask($task);
 
-        if (Yii::$app->request->isAjax) {
-            try {
-                $this->taskService->complete($task->id);
-            } catch (DomainException $e) {
-                Yii::$app->session->setFlash('error', $e->getMessage());
-            }
-            return $this->renderPartial('index', ['tasks' => $this->tasks,]);
+        try {
+            $this->taskService->complete($task->id);
+        } catch (DomainException $e) {
+            Yii::$app->session->setFlash('error', $e->getMessage());
         }
 
         return $this->redirect(['index']);

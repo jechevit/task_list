@@ -38,6 +38,9 @@ class TagsWidget extends Widget
         $this->tags = $this->task->tags;
     }
 
+    /**
+     * @return string
+     */
     public function run()
     {
         $tags = '';
@@ -51,7 +54,10 @@ class TagsWidget extends Widget
         return $tags;
     }
 
-    private function renderTags()
+    /**
+     * @return string
+     */
+    private function renderTags(): string
     {
         $tags = '';
         foreach ($this->tags as $tag) {
@@ -60,7 +66,11 @@ class TagsWidget extends Widget
         return $tags;
     }
 
-    private function renderTag(Tag $tag)
+    /**
+     * @param Tag $tag
+     * @return string
+     */
+    private function renderTag(Tag $tag): string
     {
         $view = '<span class="badge">#';
 
@@ -71,15 +81,14 @@ class TagsWidget extends Widget
         }
         $view .= '</span>';
 
-        if ($this->task->isInWork()){
-            return Html::a($view, ['index'], $this->labelClass);
-        } else {
-            return Html::tag('div', $view, $this->labelClass);
-
-        }
+        return Html::a($view, ['task/index', 'tagId' => $tag->id], $this->labelClass);
     }
 
-    private function deleteButton(int $tagId)
+    /**
+     * @param int $tagId
+     * @return string
+     */
+    private function deleteButton(int $tagId): string
     {
         return Html::a(
             '<span aria-hidden="true" class="glyphicon glyphicon-remove"></span>',
@@ -88,7 +97,10 @@ class TagsWidget extends Widget
         );
     }
 
-    private function addTag()
+    /**
+     * @return string
+     */
+    private function addTag(): string
     {
         return '&nbsp;&nbsp;' . $this->render('add-tag', [
                 'model' => $this->form,
