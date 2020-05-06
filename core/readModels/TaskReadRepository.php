@@ -46,7 +46,7 @@ class TaskReadRepository
             'query' => $query,
             'sort' => [
                 'defaultOrder' => [
-                    'priority' => SORT_ASC,
+                    'priority' => SORT_DESC,
                 ],
             ],
             'pagination' => [
