@@ -7,7 +7,6 @@ use frontend\widgets\IndexModerationButtons;
 use frontend\widgets\TagsWidget;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
-use yii\helpers\Url;
 use yii\widgets\Pjax;
 
 /** @var $tasks ActiveDataProvider */
@@ -45,9 +44,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 </div>
 
                 <div class="panel-body">
-                    <a href="<?= Url::to(['task/view', 'id' => $task->id]) ?>">
-                        <p class="list-group-item-text"><?= $task->title ?></p>
-                    </a>
+                    <?php if ($task->isInWork()):?>
+                        <?= Html::a('<p class="list-group-item-text">' . $task->title . '</p>', ['task/view', 'id' => $task->id])?>
+                    <?php else:?>
+                        <?= Html::tag('div', '<p class="list-group-item-text">' . $task->title . '</p>') ?>
+                    <?php endif;?>
                 </div>
             </div>
         <?php endforeach; ?>
