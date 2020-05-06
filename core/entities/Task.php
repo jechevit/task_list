@@ -40,20 +40,20 @@ class Task extends ActiveRecord
 
     /**
      * @param TaskUuid $uuid
-     * @param $title
+     * @param Title $title
      * @param Priority $priority
      * @return static
      * @throws AssertionFailedException
      */
     public static function create(
         TaskUuid $uuid,
-        $title,
+        Title $title,
         Priority $priority
     ): self
     {
         $task = new static();
         $task->uuid = $uuid->getUuid();
-        $task->title = $title;
+        $task->title = $title->getTitle();
         $task->setPriority($priority->getValue());
         $task->addStatus(Status::IN_WORK);
         $task->created_at = time();
@@ -61,15 +61,15 @@ class Task extends ActiveRecord
     }
 
     /**
-     * @param $title
+     * @param Title $title
      * @param Priority $priority
      */
     public function edit(
-        $title,
+        Title $title,
         Priority $priority
     ): void
     {
-        $this->title = $title;
+        $this->title = $title->getTitle();
         $this->priority = $priority;
         $this->updated_at = time();
     }

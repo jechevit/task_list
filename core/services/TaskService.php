@@ -6,6 +6,7 @@ use Assert\AssertionFailedException;
 use core\entities\Priority;
 use core\entities\Tag;
 use core\entities\Task;
+use core\entities\Title;
 use core\forms\TaskForm;
 use core\repositories\TagRepository;
 use core\repositories\TasksRepository;
@@ -52,7 +53,7 @@ class TaskService
         $uuid = $this->taskRepository->nextUuid();
         $task = Task::create(
             $uuid,
-            $form->title,
+            new Title($form->title),
             new Priority($form->priority)
         );
 
@@ -70,12 +71,17 @@ class TaskService
         return $task;
     }
 
+    /**
+     * @param int $id
+     * @param TaskForm $form
+     * @throws AssertionFailedException
+     */
     public function update(int $id, TaskForm $form): void
     {
         $task = $this->taskRepository->get($id);
         $task->edit(
-            $form->title,
-            $form->priority
+            new Title($form->title),
+            new Priority($form->priority)
         );
         $this->taskRepository->save($task);
     }
