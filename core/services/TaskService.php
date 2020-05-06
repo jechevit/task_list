@@ -54,7 +54,7 @@ class TaskService
         $task = Task::create(
             $uuid,
             new Title($form->title),
-            new Priority($form->priority)
+            new Priority((int)$form->priority)
         );
 
         $this->transaction->wrap(function () use ($task, $form) {
@@ -79,11 +79,22 @@ class TaskService
     public function update(int $id, TaskForm $form): void
     {
         $task = $this->taskRepository->get($id);
+
         $task->edit(
             new Title($form->title),
-            new Priority($form->priority)
+            new Priority((int)$form->priority)
         );
-        $this->taskRepository->save($task);
+
+        $this->transaction->wrap(function () use ($task, $form) {
+            foreach ($form->tags->existing as $tagId) {
+                $this->assignTag($task, $tagId);
+            }
+
+            foreach ($form->tags->newNames as $tagName) {
+                $this->workWithTag($task, $tagName);
+            }
+            $this->taskRepository->save($task);
+        });
     }
 
     /**

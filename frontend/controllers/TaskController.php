@@ -104,8 +104,8 @@ class TaskController extends Controller
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
-                $task = $this->taskService->create($form);
-                return $this->redirect(['view', 'id' => $task->id]);
+                $this->taskService->create($form);
+                return $this->redirect(['index', 'task' => $this->tasks]);
             } catch (DomainException $e) {
                 Yii::$app->errorHandler->logException($e);
                 Yii::$app->session->setFlash('error', $e->getMessage());
@@ -127,7 +127,7 @@ class TaskController extends Controller
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
                 $this->taskService->update($task->id, $form);
-                return $this->redirect(['view', 'id' => $task->id]);
+                return $this->redirect(['index', 'tasks' => $this->tasks]);
             } catch (DomainException $e) {
                 Yii::$app->errorHandler->logException($e);
                 Yii::$app->session->setFlash('error', $e->getMessage());
@@ -275,7 +275,6 @@ class TaskController extends Controller
         $tagsId = Yii::$app->request->bodyParams['TagsForm']['existing'];
 
         $task = $this->findModel($taskId);
-
         $this->checkTask($task);
 
         try {

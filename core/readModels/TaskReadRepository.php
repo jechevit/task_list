@@ -10,7 +10,7 @@ use yii\db\ActiveQuery;
 
 class TaskReadRepository
 {
-    const PAGE_SIZE = 25;
+    const PAGE_SIZE = 15;
 
     /**
      * @return DataProviderInterface

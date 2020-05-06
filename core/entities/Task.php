@@ -4,12 +4,10 @@ namespace core\entities;
 
 use Assert\AssertionFailedException;
 use core\databases\Table;
-use DateTimeImmutable;
 use DomainException;
 use lhs\Yii2SaveRelationsBehavior\SaveRelationsBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
-use yii\helpers\Json;
 
 /**
  * Class Task
@@ -22,17 +20,11 @@ use yii\helpers\Json;
  * @property int $updated_at
  *
  * @property Priority $priority
- * @property Status[] $statuses
  * @property TagAssignments[] $tagAssignments
  * @property Tag[] $tags
  */
 class Task extends ActiveRecord
 {
-    /**
-     * @var Status[]
-     */
-    public $statuses = [];
-
     /**
      * @var Priority
      */
@@ -114,19 +106,18 @@ class Task extends ActiveRecord
 
     /**
      * @return Status
+     * @throws AssertionFailedException
      */
     public function getCurrentStatus(): Status
     {
-        return end($this->statuses);
+        return new Status($this->current_status);
     }
 
     /**
      * @param $value
-     * @throws AssertionFailedException
      */
     private function addStatus($value): void
     {
-        $this->statuses[] = new Status($value, new DateTimeImmutable());
         $this->current_status = $value;
     }
 
@@ -282,26 +273,12 @@ class Task extends ActiveRecord
             $this->getAttribute('priority')
         );
 
-        $this->statuses = array_map(function ($row) {
-            return new Status(
-                $row['value'],
-                new DateTimeImmutable($row['date'])
-            );
-        }, Json::decode($this->getAttribute('statuses')));
-
         parent::afterFind();
     }
 
     public function beforeSave($insert)
     {
         $this->setAttribute('priority', $this->priority->getValue());
-
-        $this->setAttribute('statuses', Json::encode(array_map(function (Status $status) {
-            return [
-                'value' => $status->getValue(),
-                'date' => $status->getDate()->format(DATE_RFC3339),
-            ];
-        }, $this->statuses)));
 
         return parent::beforeSave($insert);
     }

@@ -34,7 +34,7 @@ class TagsWidget extends Widget
 
     public function init()
     {
-        $this->form = new TagsForm();
+        $this->form = new TagsForm($this->task);
         $this->tags = $this->task->tags;
     }
 
